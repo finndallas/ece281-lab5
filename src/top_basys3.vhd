@@ -46,8 +46,8 @@ architecture top_basys3_arch of top_basys3 is
     signal w_clk_TDM : std_logic;
     signal w_clk_reset : std_logic;
 --    signal w_elevator_reset  : std_logic;
---    signal w_1stelevator : std_logic_vector (3 downto 0);
---    signal w_2ndelevator : std_logic_vector (3 downto 0);
+    signal w_1stelevator : std_logic_vector (3 downto 0);
+    signal w_2ndelevator : std_logic_vector (3 downto 0);
     signal w_data : std_logic_vector (3 downto 0);
     --components
     component sevenseg_decoder is

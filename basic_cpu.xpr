@@ -90,12 +90,6 @@
   <FileSets Version="1" Minor="32">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
       <Filter Type="Srcs"/>
-      <File Path="$PPRDIR/src/ALU.vhd">
-        <FileInfo>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
       <File Path="$PPRDIR/src/TDM4.vhd">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -108,24 +102,10 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/src/controller_fsm.vhd">
+      <File Path="$PSRCDIR/sources_1/imports/src/sevenseg_decoder.vhd">
         <FileInfo>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/src/full_adder.vhd">
-        <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/src/full_adder.vhd"/>
-          <Attr Name="ImportTime" Val="1746476032"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/src/ripple_adder.vhd">
-        <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/src/ripple_adder.vhd"/>
-          <Attr Name="ImportTime" Val="1746476033"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/sevenseg_decoder.vhd"/>
+          <Attr Name="ImportTime" Val="1744159286"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -136,11 +116,34 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/imports/src/sevenseg_decoder.vhd">
+      <File Path="$PPRDIR/src/ALU.vhd">
         <FileInfo>
           <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/src/sevenseg_decoder.vhd"/>
-          <Attr Name="ImportTime" Val="1744159286"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/src/controller_fsm.vhd">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/src/full_adder.vhd">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/full_adder.vhd"/>
+          <Attr Name="ImportTime" Val="1746476032"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/src/ripple_adder.vhd">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/ripple_adder.vhd"/>
+          <Attr Name="ImportTime" Val="1746476033"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
