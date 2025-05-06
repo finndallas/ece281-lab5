@@ -54,12 +54,11 @@ architecture top_basys3_arch of top_basys3 is
     signal w_ALU_result : std_logic_vector(7 downto 0);
     signal w_ALU_flags : std_logic_vector(3 downto 0);
 
-    -- Two's complement
+    -- Two's complement try 2
     signal w_sign : std_logic;
     signal w_hund, w_tens, w_ones : std_logic_vector(3 downto 0);
     signal w_sign_display : std_logic_vector(3 downto 0);
 
-    -- MUX controlled operands
     signal w_mux_A : std_logic_vector(7 downto 0);
     signal w_mux_B : std_logic_vector(7 downto 0);
 
