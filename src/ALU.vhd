@@ -62,7 +62,7 @@ begin
         A => i_A(3 downto 0),
         B => b_new(3 downto 0),
         Cin => i_op(0),
-        S => o_result(3 downto 0),
+        S => sum(3 downto 0),
         Cout => w_carry
     );
     ripple_adder_2: ripple_adder
@@ -70,7 +70,7 @@ begin
         A => i_A(7 downto 4),
         B => b_new(7 downto 4),
         Cin => w_carry,
-        S => o_result(7 downto 4),
+        S => sum(7 downto 4),
         Cout => w_carry_2
     );
     result <= sum when ((i_op = "000") or (i_op = "001")) else --mux to select the result
@@ -82,7 +82,7 @@ begin
     o_flags(3) <= result(7); --N flag
     o_flags(2) <= not (result(0) or result(1) or result(2) or result(3) or result(4) or result(5) or result(6) or result(7)); --Z flag
     o_flags(0) <= (not i_op(1)) and (sum(7) xor i_A(7)) and (not (i_op(0) xor i_A(7) xor i_B(7))); --V flag
-    o_flags(1) <= w_carry_2 and i_op(1);
+    o_flags(1) <= w_carry_2 and (not i_op(1)); --C flag
 
  
 end Behavioral;
