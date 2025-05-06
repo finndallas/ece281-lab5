@@ -57,6 +57,11 @@ architecture top_basys3_arch of top_basys3 is
     -- Two's complement
     signal w_sign : std_logic;
     signal w_hund, w_tens, w_ones : std_logic_vector(3 downto 0);
+    signal w_sign_display : std_logic_vector(3 downto 0);
+
+    -- MUX controlled operands
+    signal w_mux_A : std_logic_vector(7 downto 0);
+    signal w_mux_B : std_logic_vector(7 downto 0);
 
     component ALU is
         Port ( i_A : in STD_LOGIC_VECTOR (7 downto 0);
@@ -133,13 +138,13 @@ begin
             o_cycle => w_cycle
         );
 
-    w_ALU_A <= sw(7 downto 0) when w_cycle(1) = '1' else (others => '0');
-    w_ALU_B <= sw(7 downto 0) when w_cycle(2) = '1' else (others => '0');
+    w_mux_A <= sw(7 downto 0) when w_cycle(1) = '1' else (others => '0');
+    w_mux_B <= sw(7 downto 0) when w_cycle(2) = '1' else (others => '0');
 
     ALU_inst : ALU
         port map (
-            i_A => w_ALU_A,
-            i_B => w_ALU_B,
+            i_A => w_mux_A,
+            i_B => w_mux_B,
             i_op => sw(2 downto 0),
             o_result => w_ALU_result,
             o_flags => w_ALU_flags
@@ -154,11 +159,13 @@ begin
             o_ones => w_ones
         );
 
+    w_sign_display <= "1010" when w_sign = '1' else "0000";
+
     TDM4_inst : TDM4
         port map (
             i_clk => w_clk_TDM,
             i_reset => btnU,
-            i_D3 => "1010" when w_sign = '1' else "0000",
+            i_D3 => w_sign_display,
             i_D2 => w_hund,
             i_D1 => w_tens,
             i_D0 => w_ones,
