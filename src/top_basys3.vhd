@@ -32,64 +32,72 @@ entity top_basys3 is
         btnU    :   in std_logic; -- reset
         btnC    :   in std_logic; -- fsm cycle
         -- outputs
-        led :   out std_logic_vector(15 downto 0);
-        -- 7-segment display segments (active-low cathodes)
-        seg :   out std_logic_vector(6 downto 0);
-        -- 7-segment display active-low enables (anodes)
-        an  :   out std_logic_vector(3 downto 0)
+        led     :   out std_logic_vector(15 downto 0);
+        seg     :   out std_logic_vector(6 downto 0);
+        an      :   out std_logic_vector(3 downto 0)
     );
 end top_basys3;
-architecture top_basys3_arch of top_basys3 is 
-	-- declare components and signals
-	-- singal
+
+architecture top_basys3_arch of top_basys3 is
+
     signal w_clk : std_logic;
     signal w_clk_TDM : std_logic;
     signal w_clk_reset : std_logic;
---    signal w_elevator_reset  : std_logic;
-    signal w_1stelevator : std_logic_vector (3 downto 0);
-    signal w_2ndelevator : std_logic_vector (3 downto 0);
-    signal w_data : std_logic_vector (3 downto 0);
-    --components
-    component sevenseg_decoder is
-            port (
-            i_Hex : in STD_LOGIC_VECTOR (3 downto 0);
-            o_seg_n : out STD_LOGIC_VECTOR (6 downto 0)
-        );
-    end component sevenseg_decoder;
-    component controller_fsm is
-    Port ( i_reset : in STD_LOGIC;
-           i_adv : in STD_LOGIC;
-           o_cycle : out STD_LOGIC_VECTOR (3 downto 0)); --one hot
-end component controller_fsm;
-	component TDM4 is
-		generic ( constant k_WIDTH : natural  := 4); -- bits in input and output
-        Port ( i_clk		: in  STD_LOGIC;
-           i_reset		: in  STD_LOGIC; -- asynchronous
-           i_D3 		: in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
-		   i_D2 		: in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
-		   i_D1 		: in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
-		   i_D0 		: in  STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
-		   o_data		: out STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
-		   o_sel		: out STD_LOGIC_VECTOR (3 downto 0)	-- selected data line (one-cold)
-	   );
-    end component TDM4;
-	component clock_divider is
-        generic ( constant k_DIV : natural := 2	); -- How many clk cycles until slow clock toggles
-                                                   -- Effectively, you divide the clk double this 
-                                                   -- number (e.g., k_DIV := 2 --> clock divider of 4)
-        port ( 	i_clk    : in std_logic;
-                i_reset  : in std_logic;		   -- asynchronous
-                o_clk    : out std_logic		   -- divided (slow) clock
-        );
-    end component clock_divider;
- 
+
+    signal w_data : std_logic_vector(3 downto 0);
+
+    -- FSM
+    signal w_cycle : std_logic_vector(3 downto 0);
+
+    -- ALU
+    signal w_ALU_A, w_ALU_B : std_logic_vector(7 downto 0);
+    signal w_ALU_result : std_logic_vector(7 downto 0);
+    signal w_ALU_flags : std_logic_vector(3 downto 0);
+
+    -- Two's complement
+    signal w_sign : std_logic;
+    signal w_hund, w_tens, w_ones : std_logic_vector(3 downto 0);
+
     component ALU is
         Port ( i_A : in STD_LOGIC_VECTOR (7 downto 0);
                i_B : in STD_LOGIC_VECTOR (7 downto 0);
-               i_op : in STD_LOGIC_VECTOR (2 downto 0); --ALU control
+               i_op : in STD_LOGIC_VECTOR (2 downto 0);
                o_result : out STD_LOGIC_VECTOR (7 downto 0);
                o_flags : out STD_LOGIC_VECTOR (3 downto 0));
-    end component ALU;
+    end component;
+
+    component sevenseg_decoder is
+        port (
+            i_Hex : in STD_LOGIC_VECTOR (3 downto 0);
+            o_seg_n : out STD_LOGIC_VECTOR (6 downto 0)
+        );
+    end component;
+
+    component controller_fsm is
+        Port ( i_reset : in STD_LOGIC;
+               i_adv : in STD_LOGIC;
+               o_cycle : out STD_LOGIC_VECTOR (3 downto 0));
+    end component;
+
+    component TDM4 is
+        generic ( constant k_WIDTH : natural := 4);
+        Port ( i_clk : in STD_LOGIC;
+               i_reset : in STD_LOGIC;
+               i_D3 : in STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               i_D2 : in STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               i_D1 : in STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               i_D0 : in STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               o_data : out STD_LOGIC_VECTOR (k_WIDTH - 1 downto 0);
+               o_sel : out STD_LOGIC_VECTOR (3 downto 0));
+    end component;
+
+    component clock_divider is
+        generic ( constant k_DIV : natural := 2);
+        port (  i_clk    : in std_logic;
+                i_reset  : in std_logic;
+                o_clk    : out std_logic);
+    end component;
+
     component twos_comp is
         port (
             i_bin: in std_logic_vector(7 downto 0);
@@ -98,70 +106,70 @@ end component controller_fsm;
             o_tens: out std_logic_vector(3 downto 0);
             o_ones: out std_logic_vector(3 downto 0)
         );
-    end component twos_comp;
+    end component;
+
 begin
-	-- PORT MAPS ----------------------------------------
---generic map
-	   clock_divider_TDM_inst : clock_divider
-	   -- its 60Hz*4 = 240 then convert to k_div, its 4 bc 4 displaus
-	   	generic map (k_div => 208333)
-	     port map(
-	     --in
-	     i_clk => clk,
-	     --out
-	     i_reset => w_clk_reset,
-	     o_clk => w_clk_TDM
-	     );
-	   clock_divider_inst : clock_divider
-	   generic map (k_div => 25000000) --ranbdolph told me this speed
-	     port map(
-	     --in
-	     i_clk => clk,
-	     --out
-	     i_reset => w_clk_reset,
-	     o_clk => w_clk
-	     );    
 
+    clock_divider_TDM_inst : clock_divider
+        generic map (k_div => 208333)
+        port map(
+            i_clk => clk,
+            i_reset => w_clk_reset,
+            o_clk => w_clk_TDM
+        );
 
---       elevator_controller_inst :  elevator_controller_fsm
---          port map(
---          --in
---            i_clk => w_clk,
---            i_reset => w_elevator_reset,
---            is_stopped => sw(0),
---            go_up_down => sw(1),
---            --out
---            o_floor => w_1stelevator
---            );
---		 elevator_controller_2_inst :  elevator_controller_fsm
---          port map(
---          --in
---            i_clk => w_clk,
---            i_reset => w_elevator_reset,
---            is_stopped => sw(14),
---            go_up_down => sw(15),
---            --out
---            o_floor => w_2ndelevator
---            );
+    clock_divider_inst : clock_divider
+        generic map (k_div => 25000000)
+        port map(
+            i_clk => clk,
+            i_reset => w_clk_reset,
+            o_clk => w_clk
+        );
 
+    controller_fsm_inst : controller_fsm
+        port map (
+            i_reset => btnU,
+            i_adv => btnC,
+            o_cycle => w_cycle
+        );
 
-		sevenseg_decoder_inst : sevenseg_decoder
-		  port map(
-		  i_Hex => w_data,
-		  o_seg_n => seg
-		  );
-		  TDM4_inst : TDM4
-        Port map ( 
+    w_ALU_A <= sw(7 downto 0) when w_cycle(1) = '1' else (others => '0');
+    w_ALU_B <= sw(7 downto 0) when w_cycle(2) = '1' else (others => '0');
+
+    ALU_inst : ALU
+        port map (
+            i_A => w_ALU_A,
+            i_B => w_ALU_B,
+            i_op => sw(2 downto 0),
+            o_result => w_ALU_result,
+            o_flags => w_ALU_flags
+        );
+
+    twos_comp_inst : twos_comp
+        port map (
+            i_bin => w_ALU_result,
+            o_sign => w_sign,
+            o_hund => w_hund,
+            o_tens => w_tens,
+            o_ones => w_ones
+        );
+
+    TDM4_inst : TDM4
+        port map (
             i_clk => w_clk_TDM,
             i_reset => btnU,
-            i_D3 => "1111",
-            i_D2 => w_2ndelevator,
-            i_D1 => "1111",
-            i_D0 => w_1stelevator,
+            i_D3 => "1010" when w_sign = '1' else "0000",
+            i_D2 => w_hund,
+            i_D1 => w_tens,
+            i_D0 => w_ones,
             o_data => w_data,
             o_sel => an
-	   );
- 
-	-- CONCURRENT STATEMENTS ----------------------------
- 
+        );
+
+    sevenseg_decoder_inst : sevenseg_decoder
+        port map (
+            i_Hex => w_data,
+            o_seg_n => seg
+        );
+
 end top_basys3_arch;
